@@ -1,0 +1,61 @@
+{{ define "components/notification.html" }}
+
+<div class="notifications-panel" id="notificationsPanel">
+    <h4 style="color: white; margin-bottom: 1rem;">Recent Notifications</h4>
+
+    <div class="notification-item warning">
+        <div class="notification-icon">
+            <i class="fas fa-battery-empty"></i>
+        </div>
+        <div class="notification-content">
+            <h5>Low Battery Alert</h5>
+            <p>Mike's Pixel 6 battery at 15%</p>
+            <small style="color: rgba(255,255,255,0.5);">2 minutes ago</small>
+        </div>
+    </div>
+
+    <div class="notification-item error">
+        <div class="notification-icon">
+            <i class="fas fa-wifi"></i>
+        </div>
+        <div class="notification-content">
+            <h5>Device Offline</h5>
+            <p>Connection lost with device #1234</p>
+            <small style="color: rgba(255,255,255,0.5);">5 minutes ago</small>
+        </div>
+    </div>
+
+    <div class="notification-item info">
+        <div class="notification-icon">
+            <i class="fas fa-map-pin"></i>
+        </div>
+        <div class="notification-content">
+            <h5>Geofence Alert</h5>
+            <p>Sarah's device entered safe zone</p>
+            <small style="color: rgba(255,255,255,0.5);">10 minutes ago</small>
+        </div>
+    </div>
+
+    <div class="notification-item info">
+        <div class="notification-icon">
+            <i class="fas fa-user-plus"></i>
+        </div>
+        <div class="notification-content">
+            <h5>New Device Added</h5>
+            <p>iPhone 14 Pro successfully registered</p>
+            <small style="color: rgba(255,255,255,0.5);">1 hour ago</small>
+        </div>
+    </div>
+
+    <div class="notification-item warning">
+        <div class="notification-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        <div class="notification-content">
+            <h5>Speed Alert</h5>
+            <p>John's device moving at 85 km/h</p>
+            <small style="color: rgba(255,255,255,0.5);">2 hours ago</small>
+        </div>
+    </div>
+</div>
+{{ end }}

@@ -1,0 +1,383 @@
+{{ define "layouts/main.html" }}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone Tracking Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.css" rel="stylesheet">
+    <link href="../../static/css/style.css" rel="stylesheet">
+    <link href="../../static/css/responsive.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        {{ template "components/header.html" . }}
+
+        <div class="main-container">
+            <!-- Sidebar -->
+            {{ template "components/sidebar.html" . }}
+
+            <!-- Main Content -->
+            <main class="main-content" id="mainContent">
+                <!-- Navigation -->
+                {{ template "components/navigation.html" . }}
+
+                <!-- Dashboard Overview -->
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon active">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">12</div>
+                            <div class="stat-label">Active Devices</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon battery">
+                            <i class="fas fa-battery-full"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">78%</div>
+                            <div class="stat-label">Avg. Battery</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Active Alerts</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon offline">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Offline Devices</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Map Section -->
+                <div class="content-grid">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Device Locations</h3>
+                            <div class="card-actions">
+                                <button class="btn btn-light btn-sm">
+                                    <i class="fas fa-sync"></i> Refresh
+                                </button>
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="fas fa-expand"></i> Fullscreen
+                                </button>
+                            </div>
+                        </div>
+                        <div id="map"></div>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="card-title">Battery Status</h3>
+                            <div class="card-actions">
+                                <button class="btn btn-light btn-sm">
+                                    <i class="fas fa-download"></i> Export
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="batteryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity Chart -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Activity Overview</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-light btn-sm">
+                                <i class="fas fa-calendar"></i> Last 7 days
+                            </button>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Device List -->
+                <div class="device-list">
+                    <div class="card-header">
+                        <h3 class="card-title">Connected Devices</h3>
+                        <div class="card-actions">
+                            <button class="btn btn-primary" id="addDeviceBtn">
+                                <i class="fas fa-plus"></i> Add Device
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="device-item">
+                        <div class="device-icon iphone">
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">John's iPhone 13</div>
+                            <div class="device-details">
+                                <div class="device-status">
+                                    <span class="status-indicator status-online"></span>
+                                    <span>Online</span>
+                                </div>
+                                <div class="battery-level">
+                                    <i class="fas fa-battery-three-quarters"></i>
+                                    <span>85%</span>
+                                </div>
+                                <div>Last seen: 2 min ago</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-item">
+                        <div class="device-icon android">
+                            <i class="fab fa-android"></i>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">Sarah's Galaxy S21</div>
+                            <div class="device-details">
+                                <div class="device-status">
+                                    <span class="status-indicator status-online"></span>
+                                    <span>Online</span>
+                                </div>
+                                <div class="battery-level">
+                                    <i class="fas fa-battery-full"></i>
+                                    <span>92%</span>
+                                </div>
+                                <div>Last seen: 5 min ago</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-item">
+                        <div class="device-icon android">
+                            <i class="fab fa-android"></i>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">Mike's Pixel 6</div>
+                            <div class="device-details">
+                                <div class="device-status">
+                                    <span class="status-indicator status-warning"></span>
+                                    <span>Low Battery</span>
+                                </div>
+                                <div class="battery-level">
+                                    <i class="fas fa-battery-quarter"></i>
+                                    <span>15%</span>
+                                </div>
+                                <div>Last seen: 10 min ago</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="device-item">
+                        <div class="device-icon iphone">
+                            <i class="fab fa-apple"></i>
+                        </div>
+                        <div class="device-info">
+                            <div class="device-name">Lisa's iPhone 12</div>
+                            <div class="device-details">
+                                <div class="device-status">
+                                    <span class="status-indicator status-offline"></span>
+                                    <span>Offline</span>
+                                </div>
+                                <div class="battery-level">
+                                    <i class="fas fa-battery-half"></i>
+                                    <span>67%</span>
+                                </div>
+                                <div>Last seen: 1 hour ago</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <!-- Add Device Modal -->
+        <div class="modal-overlay" id="addDeviceModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">Add New Device</h3>
+                    <button class="modal-close" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="addDeviceForm">
+                        <div class="form-group">
+                            <label class="form-label">Device Name</label>
+                            <input type="text" class="form-control" placeholder="e.g., John's iPhone" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Device Type</label>
+                            <select class="form-control" required>
+                                <option value="">Select device type</option>
+                                <option value="iphone">iPhone</option>
+                                <option value="android">Android</option>
+                                <option value="tablet">Tablet</option>
+                                <option value="smartwatch">Smart Watch</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Device ID</label>
+                            <input type="text" class="form-control" placeholder="Device unique identifier" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Owner</label>
+                            <input type="text" class="form-control" placeholder="Device owner name" required>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" style="flex: 1;">Add Device</button>
+                            <button type="button" class="btn btn-secondary" id="cancelAdd"
+                                style="flex: 1;">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Modal -->
+        <div class="modal-overlay" id="settingsModal">
+            <div class="modal" style="max-width: 600px;">
+                <div class="modal-header">
+                    <h3 class="modal-title">Dashboard Settings</h3>
+                    <button class="modal-close" id="closeSettingsModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="settings-tabs">
+                        <div class="tab-nav" style="display: flex; margin-bottom: 2rem; border-bottom: 1px solid #eee;">
+                            <button class="tab-btn active" data-tab="general">General</button>
+                            <button class="tab-btn" data-tab="notifications">Notifications</button>
+                            <button class="tab-btn" data-tab="map">Map</button>
+                        </div>
+
+                        <div class="tab-content" id="general">
+                            <div class="form-group">
+                                <label class="form-label">Dashboard Theme</label>
+                                <select class="form-control">
+                                    <option value="dark">Dark Theme</option>
+                                    <option value="light">Light Theme</option>
+                                    <option value="auto">Auto (System)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Update Interval</label>
+                                <select class="form-control">
+                                    <option value="5">5 seconds</option>
+                                    <option value="10" selected>10 seconds</option>
+                                    <option value="30">30 seconds</option>
+                                    <option value="60">1 minute</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Language</label>
+                                <select class="form-control">
+                                    <option value="en">English</option>
+                                    <option value="ne">नेपाली</option>
+                                    <option value="hi">हिंदी</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="notifications" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                    Low battery alerts
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                    Device offline notifications
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                    Geofence alerts
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox">
+                                    <span class="checkmark"></span>
+                                    Speed limit alerts
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Battery Alert Threshold</label>
+                                <input type="range" class="form-range" min="10" max="50" value="20">
+                                <div style="text-align: center; color: #666; margin-top: 0.5rem;">20%</div>
+                            </div>
+                        </div>
+
+                        <div class="tab-content" id="map" style="display: none;">
+                            <div class="form-group">
+                                <label class="form-label">Map Type</label>
+                                <select class="form-control">
+                                    <option value="street">Street Map</option>
+                                    <option value="satellite">Satellite</option>
+                                    <option value="terrain">Terrain</option>
+                                    <option value="hybrid">Hybrid</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Default Zoom Level</label>
+                                <input type="range" class="form-range" min="1" max="18" value="13">
+                                <div style="text-align: center; color: #666; margin-top: 0.5rem;">Level 13</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                    Show device trails
+                                </label>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-checkbox">
+                                    <input type="checkbox" checked>
+                                    <span class="checkmark"></span>
+                                    Auto-center on devices
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button class="btn btn-primary" style="flex: 1;">Save Settings</button>
+                        <button class="btn btn-secondary" id="cancelSettings" style="flex: 1;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Toast Container -->
+        <div class="toast-container" id="toastContainer"></div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/leaflet.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="../../static/js/main.js"></script>
+</body>
+
+</html>
+{{ end }}

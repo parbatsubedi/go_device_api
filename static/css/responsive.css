@@ -1,0 +1,82 @@
+/* Responsive styles */
+@media (max-width: 1200px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 992px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+
+    .main-content {
+        margin-left: 0;
+    }
+
+    .sidebar-toggle {
+        display: block;
+    }
+}
+
+@media (max-width: 768px) {
+    .header {
+        padding: 0 1rem;
+    }
+
+    .header-center {
+        margin: 0 1rem;
+    }
+
+    .username {
+        display: none;
+    }
+
+    .main-content {
+        padding: 1rem;
+    }
+
+    .dashboard-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+        flex-direction: column;
+    }
+
+    .device-details {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 576px) {
+    .search-input {
+        width: 150px;
+    }
+
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .stat-icon {
+        margin-right: 0;
+        margin-bottom: 1rem;
+    }
+
+    .card-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .card-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+}
