@@ -18,7 +18,7 @@ type DeviceModel struct {
 	LastSeenAt   time.Time `json:"last_seen_at"`
 	UserID       uint      `json:"user_id"`
 
-	User      UserModel           `gorm:"foreignKey:UserID"`
+	User      UserModel             `gorm:"foreignKey:UserID"`
 	Locations []DeviceLocationModel `gorm:"foreignKey:DeviceID"` // has many relation with DeviceLocationModel
 }
 
@@ -27,7 +27,7 @@ func (DeviceModel) TableName() string {
 }
 
 type DeviceModelDto struct {
-	ID           uint    `json:"ID"`
+	ID           uint    `json:"id"`
 	DeviceName   string  `json:"device_name"`
 	DeviceIMEI1  string  `json:"device_imei1"`
 	DeviceIMEI2  string  `json:"device_imei2"`
