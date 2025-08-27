@@ -7,6 +7,7 @@ import (
 	errorresponse "go_api/apiResponses/errorResponse"
 	"go_api/models"
 	"go_api/repository"
+	"go_api/services"
 	"net/http"
 	"strconv"
 
@@ -15,10 +16,13 @@ import (
 )
 
 type UserController struct {
+	auditService *services.AuditService
 }
 
 func MakeUserController() UserController {
-	return UserController{}
+	return UserController{
+		auditService: services.NewAuditService(),
+	}
 }
 
 func (cx *UserController) Create(c *gin.Context) {

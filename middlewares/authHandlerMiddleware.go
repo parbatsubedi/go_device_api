@@ -3,7 +3,7 @@ package middlewares
 import (
 	"fmt"
 	errorresponse "go_api/apiResponses/errorResponse"
-	"go_api/repository"
+	"go_api/interfaces"
 	"log/slog"
 	"net/http"
 	"os"
@@ -14,7 +14,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func RequireAuth(userRepo repository.IUserRepository) gin.HandlerFunc {
+func RequireAuth(userRepo interfaces.IUserRepository) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		reqToken := c.Request.Header.Get("Authorization")
 		if reqToken == "" {
