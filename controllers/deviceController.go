@@ -4,8 +4,10 @@ import (
 	apirequests "go_api/apiRequests"
 	apiresponses "go_api/apiResponses"
 	errorresponse "go_api/apiResponses/errorResponse"
+	"go_api/helpers"
 	"go_api/models"
 	"go_api/repository"
+	"go_api/services"
 	"log/slog"
 	"net/http"
 	"strconv"
@@ -14,10 +16,13 @@ import (
 )
 
 type DeviceController struct {
+	auditService *services.AuditService
 }
 
 func MakeDeviceController() *DeviceController {
-	return &DeviceController{}
+	return &DeviceController{
+		auditService: services.NewAuditService(),
+	}
 }
 
 func (cx *DeviceController) Create(c *gin.Context) {
@@ -31,6 +36,8 @@ func (cx *DeviceController) Create(c *gin.Context) {
 	}
 
 	deviceModel := deviceCreateRequest.ToModel()
+	// Set the user ID from the authenticated user context
+	deviceModel.UserID = helpers.GetCurrentUserID(c)
 
 	deviceRepo := repository.NewDeviceRepository()
 
@@ -60,6 +67,14 @@ func (cx *DeviceController) Create(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeCreateResourceErrorResponse())
 		return // unreachable code
 	}
+
+	// Log the create action to audit trail
+	ipAddress := c.ClientIP()
+	userID := helpers.GetCurrentUserID(c) // Get the user ID from the context
+	if err := cx.auditService.LogCreate("devices", deviceModel.ID, &userID, ipAddress, ""); err != nil {
+		slog.Error("Failed to log device create action", slog.Any("error", err))
+	}
+
 	// Setup Response
 	c.JSON(http.StatusCreated, apiresponses.NewSuccessResponse())
 	// return // unreachable code so commented
@@ -129,6 +144,7 @@ func (cx *DeviceController) Update(c *gin.Context) {
 	}
 	// Cast ResourceID to uint
 	model.ID = uint(resourceID)
+	model.UserID = helpers.GetCurrentUserID(c)
 	// Check if resource exists
 	existingDevice, err := deviceRepo.FindByID(model.ID)
 	if err != nil {
@@ -168,6 +184,14 @@ func (cx *DeviceController) Update(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeUpdateErrorResponse())
 		return // unreachable code
 	}
+
+	// Log the update action to audit trail
+	ipAddress := c.ClientIP()
+	userID := helpers.GetCurrentUserID(c)
+	if err := cx.auditService.LogUpdate("devices", model.ID, &userID, ipAddress, "", ""); err != nil {
+		slog.Error("Failed to log device update action", slog.Any("error", err))
+	}
+
 	// Setup Response
 	c.JSON(http.StatusOK, apiresponses.NewSuccessResponse())
 	// return //unreachable code so commented
@@ -195,6 +219,13 @@ func (cx *DeviceController) Delete(c *gin.Context) {
 	if deleteErr := deviceRepo.Delete(model); deleteErr != nil {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeDeleteErrorResponse())
 		return // unreachable code
+	}
+
+	// Log the delete action to audit trail
+	ipAddress := c.ClientIP()
+	userID := helpers.GetCurrentUserID(c)
+	if err := cx.auditService.LogDelete("devices", model.ID, &userID, ipAddress, ""); err != nil {
+		slog.Error("Failed to log device delete action", slog.Any("error", err))
 	}
 
 	// Setup Response

@@ -29,13 +29,13 @@ func (r *DeviceRepository) Save(m *models.DeviceModel) error {
 
 func (r *DeviceRepository) FindAll() ([]models.DeviceModel, error) {
 	var modelList []models.DeviceModel
-	err := r.db.Find(&modelList).Error
+	err := r.db.Preload("User").Find(&modelList).Error
 	return modelList, err
 }
 
 func (r *DeviceRepository) FindByID(id uint) (models.DeviceModel, error) {
 	var model models.DeviceModel
-	err := r.db.First(&model, id).Error
+	err := r.db.Preload("User").First(&model, id).Error
 	return model, err
 }
 
@@ -70,7 +70,7 @@ func (r *DeviceRepository) FindByIMEI(imei string) (models.DeviceModel, error) {
 
 func (r *DeviceRepository) FindByUserID(userID uint) ([]models.DeviceModel, error) {
 	var devices []models.DeviceModel
-	err := r.db.Where("user_id = ?", userID).Find(&devices).Error
+	err := r.db.Preload("User").Where("user_id = ?", userID).Find(&devices).Error
 	return devices, err
 }
 

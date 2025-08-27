@@ -23,8 +23,8 @@ type UserModel struct {
 	Gender               string    `json:"gender" binding:"required"`
 	ShouldForgetPassword int       `json:"should_forget_password"`
 	Status               bool      `gorm:"default:false" json:"status"`
-	
-	Devices              []DeviceModel `gorm:"foreignKey:UserID"`
+
+	Devices []DeviceModel `gorm:"foreignKey:UserID"`
 }
 
 func (UserModel) TableName() string {
@@ -32,7 +32,8 @@ func (UserModel) TableName() string {
 }
 
 type UserModelDto struct {
-	gorm.Model
+	// gorm.Model
+	ID                   uint    `json:"id"`
 	Name                 string  `json:"name" binding:"required"`
 	Email                string  `json:"email"`
 	UserTypeId           int     `json:"user_type_id"`

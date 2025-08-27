@@ -27,16 +27,19 @@ func (DeviceModel) TableName() string {
 }
 
 type DeviceModelDto struct {
-	ID           uint    `json:"id"`
-	DeviceName   string  `json:"device_name"`
-	DeviceIMEI1  string  `json:"device_imei1"`
-	DeviceIMEI2  string  `json:"device_imei2"`
-	Manufacturer string  `json:"manufacturer"`
-	DeviceModel  string  `json:"device_model"`
-	Status       bool    `json:"status"`
-	CreatedAt    string  `json:"created_at"`
-	UpdatedAt    string  `json:"updated_at"`
-	DeletedAt    *string `json:"deleted_at"` // * indicates that DeletedAt is a pointer to a string, meaning it can be nil if the device has not been deleted.
+	ID           uint         `json:"id"`
+	DeviceName   string       `json:"device_name"`
+	DeviceIMEI1  string       `json:"device_imei1"`
+	DeviceIMEI2  string       `json:"device_imei2"`
+	Manufacturer string       `json:"manufacturer"`
+	DeviceModel  string       `json:"device_model"`
+	Status       bool         `json:"status"`
+	CreatedAt    string       `json:"created_at"`
+	UserID       uint         `json:"user_id"`
+	User         UserModelDto `json:"user"`
+
+	UpdatedAt string  `json:"updated_at"`
+	DeletedAt *string `json:"deleted_at"` // * indicates that DeletedAt is a pointer to a string, meaning it can be nil if the device has not been deleted.
 }
 
 func (m *DeviceModel) ToDto() DeviceModelDto {
@@ -51,6 +54,8 @@ func (m *DeviceModel) ToDto() DeviceModelDto {
 		d := m.DeletedAt.Time.Format("2006-01-02 15:04:05")
 		deviceModelDto.DeletedAt = &d
 	}
+
+	deviceModelDto.UserID = m.UserID
 
 	return deviceModelDto
 }

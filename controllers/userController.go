@@ -5,6 +5,7 @@ import (
 	apirequests "go_api/apiRequests"
 	apiresponses "go_api/apiResponses"
 	errorresponse "go_api/apiResponses/errorResponse"
+	"go_api/helpers"
 	"go_api/models"
 	"go_api/repository"
 	"go_api/services"
@@ -40,8 +41,12 @@ func (cx *UserController) Create(c *gin.Context) {
 	userRepo := repository.NewUserRepository()
 
 	// Logical Validations
-	_, emailExists := userRepo.FindByEmail(model.Email)
-	if emailExists {
+	emailExists, err := userRepo.FindByEmail(model.Email)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorresponse.MakeInternalServerError())
+		return
+	}
+	if emailExists.ID != 0 { // Check if the user exists
 		c.JSON(http.StatusBadRequest, errorresponse.MakeCustomErrorResponse("Email Already Exists"))
 		return
 	}
@@ -58,6 +63,13 @@ func (cx *UserController) Create(c *gin.Context) {
 	if err := userRepo.Save(&model); err != nil {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeCreateResourceErrorResponse())
 		return
+	}
+
+	// Log audit trail
+	userID := helpers.GetCurrentUserID(c)
+	ipAddress := c.ClientIP()
+	if userID != 0 { // Only log if we have a valid user ID
+		cx.auditService.LogCreateWithObject("users", model.ID, &userID, ipAddress, model)
 	}
 
 	// Setup Response
@@ -77,8 +89,8 @@ func (cx *UserController) GetById(c *gin.Context) {
 
 	// Find from DB
 	var model models.UserModel
-	model, exists := userRepo.FindByID(uint(resourceID))
-	if !exists {
+	model, findErr := userRepo.FindByID(uint(resourceID))
+	if findErr != nil {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeResourceNotFoundErrorResponse())
 		return
 	}
@@ -115,21 +127,33 @@ func (cx *UserController) Update(c *gin.Context) {
 	model.ID = uint(resourceID)
 
 	// Check if resource exists
-	_, exists := userRepo.FindByID(model.ID)
-	if !exists {
+	_, err = userRepo.FindByID(model.ID)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeResourceNotFoundErrorResponse())
 		return
 	}
 
-	// Update Resource
-	updateError := userRepo.PartialUpdate(model)
-	if !updateError {
+	// Log audit trail before updating
+	userID := helpers.GetCurrentUserID(c)
+	ipAddress := c.ClientIP()
+	oldUser, _ := userRepo.FindByID(model.ID) // Get the old user data for logging
+	if err := userRepo.PartialUpdate(model); err != nil {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeUpdateErrorResponse())
 		return
 	}
 
+	// Log the update action
+	if userID != 0 { // Only log if we have a valid user ID
+		cx.auditService.LogUpdateWithObjects("users", model.ID, &userID, ipAddress, oldUser, model)
+	}
+
 	// Reload the updated resource to reflect the changes
-	updatedUser, _ := userRepo.FindByID(model.ID)
+	updatedUser, err := userRepo.FindByID(model.ID)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, errorresponse.MakeResourceNotFoundErrorResponse())
+		return
+	}
 
 	// Setup Response
 	userResponse := apiresponses.NewUserResponse()
@@ -144,7 +168,11 @@ func (cx *UserController) GetAll(c *gin.Context) {
 	userRepo := repository.NewUserRepository()
 
 	// Fetch all users from the database
-	modelList := userRepo.FindAll()
+	modelList, err := userRepo.FindAll()
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, errorresponse.MakeInternalServerError())
+		return
+	}
 	fmt.Printf("Found %d users\n", len(modelList))
 
 	// Convert models to DTOs
@@ -172,16 +200,23 @@ func (cx *UserController) Delete(c *gin.Context) {
 	userRepo := repository.NewUserRepository()
 
 	var model models.UserModel
-	model, exists := userRepo.FindByID(uint(resourceID))
-	if !exists {
+	model, findErr := userRepo.FindByID(uint(resourceID))
+	if findErr != nil {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeResourceNotFoundErrorResponse())
 		return
 	}
 
-	deleteSuccess := userRepo.Delete(model)
-	if !deleteSuccess {
+	// Log audit trail before deleting
+	userID := helpers.GetCurrentUserID(c)
+	ipAddress := c.ClientIP()
+	if err := userRepo.Delete(model); err != nil {
 		c.JSON(http.StatusInternalServerError, errorresponse.MakeInternalServerError())
 		return
+	}
+
+	// Log the delete action
+	if userID != 0 { // Only log if we have a valid user ID
+		cx.auditService.LogDeleteWithObject("users", model.ID, &userID, ipAddress, model)
 	}
 
 	// c.JSON(http.StatusNoContent, gin.H{

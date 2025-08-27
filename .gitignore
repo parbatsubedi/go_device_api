@@ -20,7 +20,14 @@ go.work
 # Logs can contain sensitive information and grow very large.
 *.log
 app.log
+logs/
+tmp/
+*.bak
+*.old
 
 # IDE-specific settings
 .vscode/
 .idea/
+*.swp
+*.swo
+*~

@@ -37,8 +37,8 @@ func (cx *AuthController) Login(c *gin.Context) {
 	slog.Info("Login Request", "request", loginRequest)
 
 	userRepo := repository.NewUserRepository()
-	user, userExists := userRepo.FindByMobileNo(loginRequest.MobileNo)
-	if !userExists {
+	user, err := userRepo.FindByMobileNo(loginRequest.MobileNo)
+	if err != nil {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeUnAuthorizedErrorResponse("User does not exists"))
 		return
 	}
@@ -85,14 +85,14 @@ func (cx *AuthController) Register(c *gin.Context) {
 
 	userRepo := repository.NewUserRepository()
 
-	_, userExists := userRepo.FindByMobileNo(registerRequest.MobileNo)
-	if userExists {
+	userByMobile, err := userRepo.FindByMobileNo(registerRequest.MobileNo)
+	if err == nil && userByMobile.ID != 0 {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeCustomErrorResponse("User Already Exists"))
 		return
 	}
 
-	_, emailExists := userRepo.FindByEmail(registerRequest.Email)
-	if emailExists {
+	userByEmail, err := userRepo.FindByEmail(registerRequest.Email)
+	if err == nil && userByEmail.ID != 0 {
 		c.JSON(http.StatusBadRequest, errorresponse.MakeCustomErrorResponse("Email Already Exists"))
 		return
 	}

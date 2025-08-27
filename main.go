@@ -7,7 +7,9 @@ import (
 	"path/filepath"
 
 	"go_api/database"
+	"go_api/middlewares"
 	"go_api/models"
+	"go_api/repository"
 	"go_api/routes"
 	"go_api/seeders"
 
@@ -58,7 +60,7 @@ func main() {
 	slog.Debug("Main Application Starting Point")
 
 	publicDb := database.RootDatabase
-	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{})
+	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{}, &models.DeviceModel{}, &models.DeviceLocationModel{}, &models.AuditTrailModel{})
 	if errMigratePublic != nil {
 		panic("could not auto migrate")
 		// return
@@ -78,7 +80,9 @@ func main() {
 	protectedSystemRoutes := router.Group("/api/")
 	nonProtectedSystemRoutes := router.Group("/api/")
 	adminRoutes := router.Group("/admin/")
-	// protectedSystemRoutes.Use(middlewares.RequireAuth)
+	// Create user repository instance for authentication
+	userRepo := repository.NewUserRepository()
+	protectedSystemRoutes.Use(middlewares.RequireAuth(userRepo))
 
 	// Add Auth Routes
 	routes.AddSystemAuthRoutes(protectedSystemRoutes)
