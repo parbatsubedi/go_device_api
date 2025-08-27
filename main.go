@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"time"
 
 	"go_api/database"
 	"go_api/middlewares"
@@ -24,6 +25,9 @@ func main() {
 		log.Println("Warning: .env file not found, using system environment variables")
 	}
 
+	// Initialize logging
+	setupLogging()
+
 	// Initialize database
 	database.InitDB("")
 	// Register Seeders
@@ -34,33 +38,17 @@ func main() {
 	err = seeders.RunSeeders()
 	if err != nil {
 		slog.Error("Seeding Failed!", slog.Any("error", err))
-
 	} else {
 		slog.Info("Seeding successful!")
 	}
 
 	serverHost := os.Getenv("APP_URL") // Get host from environment variable
 	if serverHost == "" {
-		serverHost = "localhost:8881" // Default value
+		serverHost = "localhost:8080" // Default value
 	}
-
-	// SETUP Logging
-	// You could set this to any `io.Writer` such as a file
-	file, err := os.OpenFile("app.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
-	if err != nil {
-		panic(err)
-	}
-	defer file.Close()
-	handlerOpts := &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}
-
-	logger := slog.New(slog.NewTextHandler(file, handlerOpts))
-	slog.SetDefault(logger)
-	slog.Debug("Main Application Starting Point")
 
 	publicDb := database.RootDatabase
-	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{}, &models.DeviceModel{}, &models.DeviceLocationModel{}, &models.AuditTrailModel{})
+	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{}, &models.DeviceLocationModel{}, &models.AuditTrailModel{})
 	if errMigratePublic != nil {
 		panic("could not auto migrate")
 		// return
@@ -71,10 +59,6 @@ func main() {
 	router.Static("/static", "./static")                      // Serve static files
 	router.StaticFile("/favicon.ico", "./static/favicon.ico") // Serve favicon
 	router.LoadHTMLGlob(filepath.Join("templates", "**", "*"))
-	// router.GET("/", handlers.HandleDefaultPage())
-	// router.Use(middlewares.CORSMiddleware())
-	// router.Use(middlewares.ErrorHandler())
-	// router.Use(middlewares.AttachMdcID)
 
 	// Auth Protected System Routes
 	protectedSystemRoutes := router.Group("/api/")
@@ -91,5 +75,52 @@ func main() {
 
 	// Start Server
 	router.Run(":" + os.Getenv("PORT"))
+}
 
+func setupLogging() {
+	logDir := "logs"
+	currentDate := time.Now().Format("2006-01-02")
+	logFile := filepath.Join(logDir, "app-"+currentDate+".log")
+
+	// Create logs directory if it doesn't exist
+	if _, err := os.Stat(logDir); os.IsNotExist(err) {
+		os.Mkdir(logDir, 0755)
+	}
+
+	// Open log file for writing
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Note: We don't close the file here to keep it open for logging
+
+	handlerOpts := &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}
+
+	logger := slog.New(slog.NewTextHandler(file, handlerOpts))
+	slog.SetDefault(logger)
+
+	// Log rotation - create new files daily
+	go func() {
+		for {
+			time.Sleep(24 * time.Hour) // Wait for a day
+			createNewLogFile(logDir)
+		}
+	}()
+}
+
+func createNewLogFile(logDir string) {
+	currentDate := time.Now().Format("2006-01-02")
+	logFile := filepath.Join(logDir, "app-"+currentDate+".log")
+
+	// Create new log file
+	file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Println("Error creating new log file:", err)
+		return
+	}
+	defer file.Close()
+
+	slog.Info("New daily log file created for " + currentDate)
 }
