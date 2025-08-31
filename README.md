@@ -1,256 +1,350 @@
-# Go Device Tracking API
+# Go API - Device Tracking System
 
-A comprehensive device tracking and management system built with Go (Gin framework) featuring real-time device monitoring, user management, and location tracking capabilities.
-
-## 🎯 Project Objectives
-
-- **Device Management**: Track and manage mobile devices with detailed information including IMEI numbers, manufacturer, model, and status
-- **Real-time Location Tracking**: Monitor device locations with GPS coordinates, battery levels, and network information
-- **User Authentication**: Secure user management system with role-based access control
-- **Admin Dashboard**: Web-based interface for monitoring device status and system analytics
-- **Audit Trail**: Comprehensive logging of all system activities and changes
+A comprehensive device tracking and management system built with Go (Golang) and Gin framework. This system provides real-time device monitoring, location tracking, and administrative dashboard capabilities.
 
 ## 🚀 Features
 
-### Core Functionality
-- **Device CRUD Operations**: Create, read, update, and delete device records
-- **Location Tracking**: Record and monitor device GPS coordinates with timestamps
-- **User Management**: Register, authenticate, and manage users with different roles
-- **Real-time Dashboard**: Monitor device status, battery levels, and location data
-- **Audit Logging**: Track all system changes and user activities
+- **Device Management**: Create, read, update, and delete devices
+- **Device Commands**: Send commands to devices (lock, unlock, wipe, ring, locate, status)
+- **Real-time Location Tracking**: Track device locations with GPS coordinates
+- **User Authentication**: Secure user management with role-based access
+- **Admin Dashboard**: Comprehensive dashboard with real-time statistics
+- **Audit Trail**: Complete logging of all system activities
+- **Dual Input Support**: Accept both JSON and form data for all endpoints
+- **RESTful API**: Clean, well-documented API endpoints
 
-### Technical Features
-- RESTful API architecture
-- JWT-based authentication
-- PostgreSQL database with GORM ORM
-- HTML templating with responsive design
-- Real-time data visualization
-- Docker containerization support
+## 📊 Dashboard Features
 
-## 🛠️ Technology Stack
+The admin dashboard provides:
+- Real-time device statistics (active/offline devices)
+- Battery level monitoring with alerts
+- Device status overview
+- Interactive device list with live data
+- Location tracking visualization
 
-- **Backend**: Go 1.24.3, Gin Web Framework
+## 🛠️ Tech Stack
+
+- **Backend**: Go (Golang) 1.24.3
+- **Framework**: Gin Web Framework
 - **Database**: PostgreSQL with PostGIS extension
 - **ORM**: GORM
+- **Templating**: Go HTML Templates
 - **Frontend**: HTML5, CSS3, JavaScript
-- **Authentication**: JWT (JSON Web Tokens)
-- **Containerization**: Docker, Docker Compose
-- **Logging**: Structured logging with slog
+- **Authentication**: JWT-based authentication
 
-<!-- ## 📦 Installation & Setup
+## 📦 Installation
 
 ### Prerequisites
 
 - Go 1.24.3 or later
-- PostgreSQL database
+- PostgreSQL with PostGIS extension
 - Docker and Docker Compose (optional)
 
-### Method 1: Using Docker (Recommended)
+### Using Docker (Recommended)
 
-1. **Clone the repository**:
-   ```bash
-   git clone <repository-url>
-   cd go_api
-   ```
-
-2. **Start the database services**:
-   ```bash
-   docker-compose up -d
-   ```
-
-3. **Set up environment variables**:
-   ```bash
-   cp .env.example .env
-   # Edit .env file with your configuration
-   ```
-
-4. **Install Go dependencies**:
-   ```bash
-   go mod download
-   ```
-
-5. **Run database migrations**:
-   ```bash
-   go run main.go
-   # The application will automatically run migrations and seeders
-   ```
-
-6. **Start the application**:
-   ```bash
-   go run main.go
-   ```
-
-### Method 2: Manual Setup
-
-1. **Install PostgreSQL** and create a database
-2. **Set up environment variables**:
-   ```bash
-   DB_HOST=localhost
-   DB_PORT=5432
-   DB_NAME=your_database_name
-   DB_USER=your_username
-   DB_PASSWORD=your_password
-   SERVER_PORT=8080
-   APP_SECRET=your-jwt-secret-key
-   ```
-
-3. **Run the application**:
-   ```bash
-   go run main.go
-   ```
-
-## 🏃‍♂️ Running the Application
-
-### Development Mode
+1. Clone the repository:
 ```bash
-# Start the server
-go run main.go
-
-# Server will be available at: http://localhost:8080
+git clone <repository-url>
+cd go_api
 ```
 
-### Production Mode
+2. Start the database services:
 ```bash
-# Build the binary
-go build -o go-api
+docker-compose up -d
+```
 
-# Run the binary
-./go-api
-``` -->
+3. Set up environment variables:
+```bash
+cp .env.example .env
+# Edit .env with your database credentials
+```
 
-## 📊 API Endpoints
+4. Install Go dependencies:
+```bash
+go mod download
+```
 
-### Authentication Routes
+5. Run database migrations:
+```bash
+go run main.go
+# The application will automatically run migrations on startup
+```
+
+6. Start the application:
+```bash
+go run main.go
+```
+
+### Manual Setup
+
+1. Install PostgreSQL and create a database
+2. Install PostGIS extension:
+```sql
+CREATE EXTENSION postgis;
+```
+
+3. Set environment variables:
+```bash
+export DB_HOST=localhost
+export DB_PORT=5432
+export DB_NAME=your_database
+export DB_USER=your_username
+export DB_PASSWORD=your_password
+export APP_PORT=8080
+```
+
+4. Run the application:
+```bash
+go run main.go
+```
+
+## 🔧 Configuration
+
+### Environment Variables
+
+Create a `.env` file in the root directory:
+
+```env
+DB_HOST=localhost
+DB_PORT=5432
+DB_NAME=go_api
+DB_USER=postgres
+DB_PASSWORD=password
+APP_PORT=8080
+APP_URL=http://localhost:8080
+JWT_SECRET=your-secret-key
+```
+
+### Database Schema
+
+The application automatically creates the following tables:
+- `users` - User management and authentication
+- `devices` - Device information and status
+- `device_locations` - GPS coordinates and device metrics
+- `audit_trails` - System activity logging
+
+## 📡 API Endpoints
+
+### Authentication
 - `POST /api/login` - User login
 - `POST /api/register` - User registration
 
-### Protected Routes (Require Authentication)
+### Devices (Protected)
 - `GET /api/devices` - Get all devices
 - `POST /api/devices` - Create new device
 - `GET /api/devices/:id` - Get device by ID
 - `POST /api/devices/:id` - Update device
 - `DELETE /api/devices/:id` - Delete device
 
-### Admin Routes
-- `GET /admin/` - Admin dashboard
-- `GET /admin/dashboard` - Dashboard view
+### Device Commands (Protected)
+- `POST /api/device-commands/send/:device_id` - Send command to device
+- `GET /api/device-commands/device/:device_id` - Get all commands for device
+- `GET /api/device-commands/pending/:device_id` - Get pending commands for device
+- `POST /api/device-commands/acknowledge/:commandId` - Acknowledge command
 
-## 🖥️ User Interface
+### Device Locations
+- `POST /api/device-locations` - Create location entry
 
 ### Admin Dashboard
-The web interface provides a comprehensive dashboard with:
+- `GET /admin/` - Admin dashboard
+- `GET /admin/dashboard` - Dashboard alternative route
+- `GET /admin/api/dashboard` - Dashboard data API
 
-- **Real-time Device Monitoring**: View active devices with status indicators
-- **Location Tracking**: Interactive map showing device locations
-- **Battery Status**: Monitor device battery levels
-- **Statistics**: System metrics and performance indicators
-- **Device Management**: CRUD operations through intuitive UI
+## 🎯 Usage
 
-### Accessing the UI
-1. Start the application
-2. Open your browser and navigate to `http://localhost:8080/admin`
-3. Use the login functionality to access protected routes
+### Accessing the Dashboard
 
-## ⚙️ Configuration
+1. Start the application:
+```bash
+go run main.go
+```
 
-### Environment Variables
+2. Open your browser and navigate to:
+```
+http://localhost:8080/admin/
+```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `SERVER_PORT` | Application port | 8080 |
-| `DB_HOST` | Database host | localhost |
-| `DB_PORT` | Database port | 5432 |
-| `DB_NAME` | Database name | postgres |
-| `DB_USER` | Database user | postgres |
-| `DB_PASSWORD` | Database password | password |
-| `APP_SECRET` | JWT secret key | your-secret-key-here |
-| `APP_ENV` | Application environment | development |
+3. The dashboard will display:
+- Real-time device statistics
+- Battery levels and alerts
+- Device status overview
+- Interactive device list
 
-### Database Configuration
+### API Usage Examples
 
-The application uses PostgreSQL with the following tables:
-- `users` - User accounts and authentication
-- `devices` - Device information and metadata
-- `device_locations` - GPS coordinates and tracking data
-- `audit_trails` - System activity logs
+#### Authentication
+```bash
+# Login (JSON)
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/json" \
+  -d '{"mobile_no":"9843723270","password":"password"}'
+
+# Login (Form Data)
+curl -X POST http://localhost:8080/api/login \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -d "mobile_no=9843723270&password=password"
+```
+
+#### Device Management
+```bash
+# Create device (JSON)
+curl -X POST http://localhost:8080/api/devices \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{"name":"iPhone 15","device_imei1":"123456789012345","device_imei2":"123456789012346","manufacturer":"Apple","device_model":"iPhone 15"}'
+
+# Create device (Form Data)
+curl -X POST http://localhost:8080/api/devices \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d "name=iPhone 15&device_imei1=123456789012345&device_imei2=123456789012346&manufacturer=Apple&device_model=iPhone 15"
+
+# Get all devices
+curl -X GET http://localhost:8080/api/devices \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+#### Device Commands
+```bash
+# Send command (JSON)
+curl -X POST http://localhost:8080/api/device-commands/send/1 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d '{"command_type":"lock","command_data":"immediate"}'
+
+# Send command (Form Data)
+curl -X POST http://localhost:8080/api/device-commands/send/1 \
+  -H "Content-Type: application/x-www-form-urlencoded" \
+  -H "Authorization: Bearer <your-jwt-token>" \
+  -d "command_type=lock&command_data=immediate"
+
+# Get device commands
+curl -X GET http://localhost:8080/api/device-commands/device/1 \
+  -H "Authorization: Bearer <your-jwt-token>"
+
+# Get pending commands
+curl -X GET http://localhost:8080/api/device-commands/pending/1 \
+  -H "Authorization: Bearer <your-jwt-token>"
+
+# Acknowledge command
+curl -X POST http://localhost:8080/api/device-commands/acknowledge/1 \
+  -H "Authorization: Bearer <your-jwt-token>"
+```
+
+### Supported Command Types
+
+The device command system supports the following command types:
+
+- **lock**: Lock the device immediately or schedule for later
+- **unlock**: Unlock the device immediately or schedule for later
+- **wipe**: Factory reset the device (immediate only)
+- **ring**: Make the device ring loudly to locate it
+- **locate**: Get current GPS location of the device
+- **status**: Request device status and battery information
+
+#### Command Data Options
+
+- **immediate**: Execute command immediately
+- **scheduled**: Schedule command for later execution
+- **quiet**: Execute command silently (for lock/unlock)
 
 ## 📁 Project Structure
 
 ```
 go_api/
 ├── apiRequests/          # Request models and validation
+│   ├── deviceRequest.go      # Device CRUD request models
+│   └── deviceCommandRequest.go # Device command request models
 ├── apiResponses/         # Response models and formatting
-├── config/               # Configuration management
-├── controllers/          # HTTP controllers
-├── database/             # Database connection and handlers
-├── helpers/              # Utility functions
-├── interfaces/           # Service interfaces
-├── middlewares/          # HTTP middleware
-├── models/               # Database models
-├── repository/           # Data access layer
-├── routes/               # Route definitions
-├── seeders/              # Database seed data
-├── services/             # Business logic
-├── static/               # Static assets (CSS, JS, images)
-├── templates/            # HTML templates
-├── main.go              # Application entry point
-└── docker-compose.yml   # Docker configuration
+│   └── deviceCommandResponse.go # Device command response models
+├── config/              # Configuration files
+├── controllers/         # HTTP controllers
+│   ├── deviceController.go   # Device CRUD operations
+│   └── deviceCommandController.go # Device command operations
+├── database/           # Database connection and setup
+├── helpers/            # Utility functions
+├── interfaces/         # Service interfaces
+│   ├── device.go           # Device repository interface
+│   └── device_command.go   # Device command repository interface
+├── logs/               # Application logs
+├── middlewares/        # HTTP middleware
+├── models/             # Database models
+│   └── device_command.go    # Device command model
+├── repository/         # Data access layer
+│   ├── deviceRepository.go      # Device repository implementation
+│   └── deviceCommandRepository.go # Device command repository implementation
+├── routes/             # Route definitions
+├── seeders/           # Database seeders
+├── services/          # Business logic
+├── static/            # Static assets (CSS, JS, images)
+├── templates/         # HTML templates
+└── main.go           # Application entry point
 ```
 
-## 🔧 Development
+## 🧪 Testing
 
-### Adding New Features
-1. Create models in `models/` directory
-2. Implement repositories in `repository/`
-3. Add controllers in `controllers/`
-4. Define routes in `routes/`
-5. Update templates if needed
-
-### Database Migrations
-The application uses GORM auto-migration. Models are automatically migrated when the application starts.
-
-### Testing
+Run tests with:
 ```bash
-# Run tests
 go test ./...
 ```
 
-## 🐛 Troubleshooting
+## 📈 Monitoring
 
-### Common Issues
+The application includes:
+- Automatic logging to `logs/app-YYYY-MM-DD.log`
+- Daily log rotation
+- Audit trail for all CRUD operations
+- Performance monitoring
 
-1. **Database Connection Issues**
-   - Ensure PostgreSQL is running
-   - Check environment variables
-   - Verify database credentials
+## 🔒 Security Features
 
-2. **Port Conflicts**
-   - Change `SERVER_PORT` in environment variables
-   - Check if port 8080 is available
-
-3. **Docker Issues**
-   - Ensure Docker is running
-   - Check container logs: `docker-compose logs`
-
-### Logs
-Application logs are stored in the `logs/` directory with daily rotation.
-
-<!-- ## 📝 License
-
-This project is licensed under the MIT License.
+- JWT-based authentication
+- Password hashing with bcrypt
+- CORS middleware
+- Input validation
+- SQL injection prevention
+- XSS protection
 
 ## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests if applicable
+4. Add tests
 5. Submit a pull request
 
-## 📞 Support
+## 📄 License
 
-For support and questions, please open an issue in the GitHub repository.
+This project is licensed under the MIT License.
+
+## 🆘 Support
+
+For support and questions:
+- Check the documentation
+- Open an issue on GitHub
+- Contact the development team
+
+## 🚀 Deployment
+
+### Production Deployment
+
+1. Build the application:
+```bash
+go build -o go-api
+```
+
+2. Set production environment variables
+3. Use a process manager (systemd, PM2, etc.)
+4. Configure reverse proxy (nginx, Apache)
+5. Set up SSL certificates
+
+### Docker Production
+
+```bash
+docker build -t go-api .
+docker run -p 8080:8080 --env-file .env go-api
+```
 
 ---
 
-**Note**: This is a development version. Ensure proper security measures are implemented before deploying to production. -->
+**Note**: Make sure to replace placeholder values and update the documentation as needed for your specific deployment environment.

@@ -29,7 +29,7 @@ func (cx *DeviceLocationController) Create(c *gin.Context) {
 
 	deviceLocationModel := deviceLocationCreateRequest.ToModel()
 
-	deviceLocationRepo := repository.NewDeviceLocationRepository(nil)
+	deviceLocationRepo := repository.NewDeviceLocationRepository()
 
 	// Create Resource
 	if createErr := deviceLocationRepo.Create(&deviceLocationModel); createErr != nil {

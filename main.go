@@ -48,7 +48,7 @@ func main() {
 	}
 
 	publicDb := database.RootDatabase
-	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{}, &models.DeviceLocationModel{}, &models.AuditTrailModel{})
+	errMigratePublic := publicDb.DB.AutoMigrate(&models.UserModel{}, &models.DeviceModel{}, &models.DeviceLocationModel{}, &models.AuditTrailModel{}, &models.DeviceCommandModel{})
 	if errMigratePublic != nil {
 		panic("could not auto migrate")
 		// return
@@ -67,6 +67,9 @@ func main() {
 	// Create user repository instance for authentication
 	userRepo := repository.NewUserRepository()
 	protectedSystemRoutes.Use(middlewares.RequireAuth(userRepo))
+
+	// CORS Middleware
+	router.Use(middlewares.CORSMiddleware())
 
 	// Add Auth Routes
 	routes.AddSystemAuthRoutes(protectedSystemRoutes)

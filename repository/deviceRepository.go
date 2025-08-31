@@ -2,6 +2,7 @@ package repository
 
 import (
 	"go_api/database"
+	"go_api/interfaces"
 	"go_api/models"
 
 	"gorm.io/gorm"
@@ -10,6 +11,9 @@ import (
 type DeviceRepository struct {
 	db *gorm.DB
 }
+
+// Ensure DeviceRepository implements IDeviceRepository
+var _ interfaces.IDeviceRepository = (*DeviceRepository)(nil)
 
 func NewDeviceRepository() *DeviceRepository {
 	return &DeviceRepository{
@@ -39,19 +43,19 @@ func (r *DeviceRepository) FindByID(id uint) (models.DeviceModel, error) {
 	return model, err
 }
 
-func (r *DeviceRepository) Exists(m models.DeviceModel) bool {
+func (r *DeviceRepository) Exists(m models.DeviceModel) (bool, error) {
 	var model models.DeviceModel
 
 	result := r.db.First(&model, m.ID)
 
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
-			return false
+			return false, nil
 		}
-		panic(result.Error.Error())
+		return false, result.Error
 	}
 
-	return true
+	return true, nil
 }
 
 func (r *DeviceRepository) PartialUpdate(m *models.DeviceModel) error {
